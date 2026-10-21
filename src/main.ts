@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 // ---- 基础页面设置 ----
 document.body.style.margin = '0'
@@ -22,12 +23,21 @@ document.body.appendChild(renderer.domElement)
 // 这正是今晚的改造任务之一 —— 换成 MeshStandardMaterial 并加上光。
 const cube = new THREE.Mesh(
   new THREE.BoxGeometry(1, 1, 1),
-  new THREE.MeshBasicMaterial({ color: 0x4f9dff })
+  new THREE.MeshStandardMaterial({ color: 0x4f9dff, metalness: 0.2, roughness: 0.4 })
 )
+cube.position.y = 0.5
 scene.add(cube)
 
+scene.add(new THREE.AmbientLight(0xffffff, 0.6))
+const dir = new THREE.DirectionalLight(0xffffff, 2.2)
+dir.position.set(5, 10, 7)
+scene.add(dir)
+
+scene.add(new THREE.GridHelper(20, 20, 0x2a3542, 0x1c242e))
+
 // ---- 窗口自适应 ----
-addEventListener('resize', () => {
+addEventListener('resize', () =>
+{
   camera.aspect = innerWidth / innerHeight
   camera.updateProjectionMatrix()
   renderer.setSize(innerWidth, innerHeight)
@@ -35,10 +45,17 @@ addEventListener('resize', () => {
 
 // ---- 渲染循环 ----
 const clock = new THREE.Clock()
-renderer.setAnimationLoop(() => {
+renderer.setAnimationLoop(() =>
+{
   cube.rotation.y += clock.getDelta() * 0.8
   renderer.render(scene, camera)
 })
+
+const control = new OrbitControls(camera, renderer.domElement)
+control.target.set(0, 0.5, 0)
+control.enableDamping = true
+control.dampingFactor = 0.08
+control.update()
 
 /*
 ============================================================
